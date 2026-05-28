@@ -1,19 +1,91 @@
 glmark2 is an OpenGL 2.0 and ES 2.0 benchmark.
 
-glmark2 is developed by Alexandros Frantzis and Jesse Barker based on the
-original glmark benchmark by Ben Smith.
+glmark2 is developed by Alexandros Frantzis and Jesse Barker
+based on the original glmark benchmark by Ben Smith.
 
 It is licensed under the GPLv3 (see COPYING).
 
-To build glmark2 you need:
+Windows/MSYS2 build notes
+=========================
+This document contains additional notes for building glmark2
+on Windows using MSYS2 and MinGW.
 
- * meson (>= 0.47)
- * libpng 1.6
- * Window system development files for the flavors you want to build
-   (e.g, X11, Wayland, drm)
- * libGL (for desktop GL)
- * libEGL and libGLESv2 (for GLESv2)
+Supported targets:
+ * NT6+ x64  (Vista/7/8/10/11 64-bit)
+ * NT6+ x86  (Vista/7/8/10/11 32-bit)
+ * NT5  x86  (Windows XP)
 
-Read the INSTALL file for building/installation instructions,
 
-Read the INSTALL.android file for instructions for Android.
+Prerequisites
+-------------
+Install MSYS2 from:
+    https://www.msys2.org/
+
+Default installation path:
+    C:\msys64
+
+
+Core build dependencies
+-----------------------
+
+Required for all targets:
+    pacman -S mingw-w64-x86_64-meson \
+              mingw-w64-x86_64-ninja \
+              git \
+              python
+
+
+NT6+ x64 build
+--------------
+Environment:
+    MSYS2 MinGW 64-bit (MINGW64)
+
+Dependencies:
+    pacman -S mingw-w64-x86_64-gcc \
+              mingw-w64-x86_64-libpng \
+              mingw-w64-x86_64-libjpeg-turbo
+
+
+NT6+ x86 build
+--------------
+Environment:
+    MSYS2 MinGW 32-bit (MINGW32)
+
+Dependencies:
+    pacman -S mingw-w64-i686-gcc \
+              mingw-w64-i686-libpng \
+              mingw-w64-i686-libjpeg-turbo
+
+
+NT5 / Windows XP build
+----------------------
+Uses the same i686 toolchain as NT6+ x86, but requires
+targeting the legacy Win32 API and static GCC runtime
+linking flags.
+
+Typical Meson flags:
+    -Dc_args="-D_WIN32_WINNT=0x0501 -DWINVER=0x0501"
+    -Dcpp_args="-D_WIN32_WINNT=0x0501 -DWINVER=0x0501"
+    -Dc_link_args="-static-libgcc"
+    -Dcpp_link_args="-static-libgcc -static-libstdc++"
+
+
+Runtime DLLs
+------------
+The provided multi-target build script automatically copies
+the required runtime DLLs into each build directory.
+
+DLL layout:
+
+    dlls/
+    ├── x64/
+    └── x86/
+        ├── NT5/
+        └── NT6/
+
+Troubleshooting
+---------------
+If Meson cannot find opengl32, make sure you are building
+from a proper MinGW environment.
+
+Do not use the plain MSYS shell.
